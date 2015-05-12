@@ -1,0 +1,14 @@
+{
+  "name": "dookie",
+  "version": "0.0.0",
+  "dependencies": {
+    "mongodb": "2.0.30",
+    "mongodb-extended-json": "1.3.0",
+    "mongodb-ns": "1.0.0",
+    "underscore": "1.5.2",
+    "wagner-core": "0.0.5"
+  },
+  "devDependencies": {
+    "mocha": "2.2.4"
+  }
+}
