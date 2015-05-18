@@ -19,6 +19,33 @@ describe('dookie:push', function() {
       });
     });
   });
+
+  it('$extend syntax', function(done) {
+    var uri = 'mongodb://localhost:27017/test';
+
+    var docs = {
+      $test: { a: 1, b: 2 },
+      sample: [
+        { $extend: '$test', x: 1, b: 3 }
+      ]
+    };
+
+    dookie.push(uri, docs, function(error, results) {
+      assert.ifError(error);
+      assert.ok(results.sample);
+      mongodb.MongoClient.connect(uri, function(error, db) {
+        assert.ifError(error);
+        db.collection('sample').find({}).toArray(function(error, docs) {
+          assert.ifError(error);
+          assert.equal(docs.length, 1);
+          assert.equal(docs[0].x, 1);
+          assert.equal(docs[0].a, 1);
+          assert.equal(docs[0].b, 3);
+          done();
+        });
+      });
+    });
+  });
 });
 
 describe('dookie:pull', function() {

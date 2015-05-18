@@ -17,8 +17,40 @@ wagner.task('drop', function(db, callback) {
 
 wagner.task('push', function(drop, data, callback) {
   var db = drop;
+  var extensions = {};
+
+  for (var key in data) {
+    if (key.substr(0, '@require:'.length) === '@require:') {
+      var d = JSON.parse(fs.readFileSync(key.substr('@require:'.length)));
+      for (var key in d) {
+        if (typeof data[key] === 'undefined') {
+          data[key] = d[key];
+        }
+      }
+    }
+  }
+
+  for (var key in data) {
+    if (key[0] !== '$') {
+      continue;
+    }
+
+    extensions[key] = data[key];
+    delete data[key];
+  }
+
   wagner.parallel(data, function(docs, collection, callback) {
     _.each(docs, function(doc, index) {
+      if (doc.$extend) {
+        var tmp = doc.$extend;
+        delete doc.$extend;
+        for (var key in extensions[tmp]) {
+          if (typeof doc[key] === 'undefined') {
+            doc[key] = extensions[tmp][key];
+          }
+        }
+      }
+
       docs[index] = ejson.deflate(doc);
     });
     db.collection(collection).insert(docs, callback);
