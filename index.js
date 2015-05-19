@@ -11,12 +11,11 @@ wagner.task('db', function(uri, callback) {
 
 wagner.task('drop', function(db, callback) {
   db.dropDatabase(function(error) {
-    callback(error, db);
+    callback(error, null);
   });
 });
 
-wagner.task('push', function(drop, data, callback) {
-  var db = drop;
+wagner.task('push', function(db, drop, data, callback) {
   var extensions = {};
 
   for (var key in data) {
