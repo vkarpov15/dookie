@@ -1,3 +1,4 @@
+var dot = require('dot-component');
 var ejson = require('mongodb-extended-json');
 var emitter = require('events').EventEmitter;
 var mongodb = require('mongodb');
@@ -47,6 +48,13 @@ wagner.task('push', function(db, drop, data, callback) {
           if (typeof doc[key] === 'undefined') {
             doc[key] = extensions[tmp][key];
           }
+        }
+      }
+      if (doc.$set) {
+        var tmp = doc.$set;
+        delete doc.$set;
+        for (var key in tmp) {
+          dot.set(doc, key, tmp[key]);
         }
       }
 
