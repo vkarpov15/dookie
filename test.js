@@ -46,6 +46,31 @@ describe('dookie:push', function() {
       });
     });
   });
+
+  it('recursive $extend syntax', function(done) {
+    var uri = 'mongodb://localhost:27017/test';
+
+    var docs = {
+      $test: { a: 1, b: 2 },
+      sample: [
+        { x: { $extend: '$test' } }
+      ]
+    };
+
+    dookie.push(uri, docs, function(error, results) {
+      assert.ifError(error);
+      assert.ok(results.sample);
+      mongodb.MongoClient.connect(uri, function(error, db) {
+        assert.ifError(error);
+        db.collection('sample').find({}).toArray(function(error, docs) {
+          assert.ifError(error);
+          assert.equal(docs.length, 1);
+          assert.deepEqual(docs[0].x, { a: 1, b: 2 });
+          done();
+        });
+      });
+    });
+  });
 });
 
 describe('dookie:pull', function() {

@@ -41,15 +41,7 @@ wagner.task('push', function(db, drop, data, callback) {
 
   wagner.parallel(data, function(docs, collection, callback) {
     _.each(docs, function(doc, index) {
-      if (doc.$extend) {
-        var tmp = doc.$extend;
-        delete doc.$extend;
-        for (var key in extensions[tmp]) {
-          if (typeof doc[key] === 'undefined') {
-            doc[key] = extensions[tmp][key];
-          }
-        }
-      }
+      expand(extensions, doc);
       if (doc.$set) {
         var tmp = doc.$set;
         delete doc.$set;
@@ -63,6 +55,24 @@ wagner.task('push', function(db, drop, data, callback) {
     db.collection(collection).insert(docs, callback);
   }, callback);
 });
+
+function expand(extensions, doc) {
+  if (doc.$extend) {
+    var tmp = doc.$extend;
+    delete doc.$extend;
+    for (var key in extensions[tmp]) {
+      if (typeof doc[key] === 'undefined') {
+        doc[key] = extensions[tmp][key];
+      }
+    }
+  }
+
+  Object.keys(doc).forEach(function(key) {
+    if (typeof doc[key] === 'object') {
+      expand(extensions, doc[key]);
+    }
+  });
+}
 
 wagner.task('pull', function(db, callback) {
   db.listCollections().toArray(function(error, collections) {
