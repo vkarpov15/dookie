@@ -3,6 +3,7 @@
 var commander = require('commander');
 var dookie = require('../');
 var fs = require('fs');
+var yaml = require('js-yaml');
 
 commander.
   usage('dookie (pull|push) --file <file> --db <database name>').
@@ -36,6 +37,19 @@ if (cmd === 'pull') {
       process.exit(1);
     }
     fs.writeFileSync(commander.file, JSON.stringify(data, null, '  '));
+    console.log('Success!');
+    process.exit(0);
+  });
+} else {
+  console.log('Writing data from ' + commander.file + ' to ' +
+    commander.db);
+  var data = yaml.safeLoad(fs.readFileSync(commander.file));
+
+  dookie.push('mongodb://localhost:27017/' + commander.db, data, function(error, data) {
+    if (error) {
+      console.log('Error writing data: ' + error);
+      process.exit(1);
+    }
     console.log('Success!');
     process.exit(0);
   });
