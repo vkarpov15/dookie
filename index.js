@@ -1,3 +1,4 @@
+var clone = require('clone');
 var dot = require('dot-component');
 var ejson = require('mongodb-extended-json');
 var emitter = require('events').EventEmitter;
@@ -62,7 +63,7 @@ function expand(extensions, doc) {
     delete doc.$extend;
     for (var key in extensions[tmp]) {
       if (typeof doc[key] === 'undefined') {
-        doc[key] = extensions[tmp][key];
+        doc[key] = clone(extensions[tmp][key]);
       }
     }
   }

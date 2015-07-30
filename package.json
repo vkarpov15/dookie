@@ -5,6 +5,7 @@
     "test": "mocha ./test.js"
   },
   "dependencies": {
+    "clone": "1.0.2",
     "commander": "2.8.1",
     "dot-component": "0.1.1",
     "js-yaml": "3.2.1",
