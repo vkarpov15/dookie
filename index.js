@@ -21,8 +21,8 @@ wagner.task('push', function(db, drop, data, callback) {
   var extensions = {};
 
   for (var key in data) {
-    if (key.substr(0, '@require:'.length) === '@require:') {
-      var d = JSON.parse(fs.readFileSync(key.substr('@require:'.length)));
+    if (key.substr(0, '$require:'.length) === '$require:') {
+      var d = JSON.parse(fs.readFileSync(key.substr('$require:'.length)));
       for (var key in d) {
         if (typeof data[key] === 'undefined') {
           data[key] = d[key];
