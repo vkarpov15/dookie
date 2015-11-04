@@ -82,13 +82,12 @@ describe('dookie:pull', function() {
         assert.ifError(error);
         db.collection('sample').insert({ x: 1 }, function(error) {
           assert.ifError(error);
-          dookie.pull(uri, function(error, results) {
-            assert.ifError(error);
+          dookie.pull(uri).then(function(results) {
             assert.equal(Object.keys(results).length, 1);
             assert.equal(results.sample.length, 1);
             assert.equal(results.sample[0].x, 1);
             done();
-          });
+          }).catch((error) => done(error));
         });
       });
     });

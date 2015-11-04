@@ -31,15 +31,18 @@ if (!commander.db) {
 if (cmd === 'pull') {
   console.log('Writing data from ' + commander.db + ' to ' +
     commander.file);
-  dookie.pull('mongodb://localhost:27017/' + commander.db, function(error, data) {
-    if (error) {
-      console.log('Error reading data: ' + error);
-      process.exit(1);
-    }
-    fs.writeFileSync(commander.file, JSON.stringify(data, null, '  '));
-    console.log('Success!');
-    process.exit(0);
-  });
+  dookie.pull('mongodb://localhost:27017/' + commander.db).
+    then(function(data) {
+      fs.writeFileSync(commander.file, JSON.stringify(data, null, '  '));
+      console.log('Success!');
+      process.exit(0);
+    }).
+    catch(function(error) {
+      if (error) {
+        console.log('Error reading data: ' + error);
+        process.exit(1);
+      }
+    });
 } else {
   console.log('Writing data from ' + commander.file + ' to ' +
     commander.db);

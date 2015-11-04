@@ -1,3 +1,6 @@
+'use strict';
+
+let co = require('co');
 var clone = require('clone');
 var dot = require('dot-component');
 var ejson = require('mongodb-extended-json');
@@ -75,41 +78,33 @@ function expand(extensions, doc) {
   });
 }
 
-wagner.task('pull', function(db, callback) {
-  db.listCollections().toArray(function(error, collections) {
-    if (error) {
-      return callback(error);
+function pull(uri) {
+  return co(function*() {
+    let db = yield mongodb.MongoClient.connect(uri);
+
+    let collections = yield db.listCollections().toArray();
+
+    let promises = [];
+    let filteredCollections = [];
+    for (let i = 0; i < collections.length; ++i) {
+      let namespace = ns(`test.${collections[i].name}`);
+      if (namespace.system || namespace.oplog || namespace.special) {
+        continue;
+      }
+      filteredCollections.push(collections[i].name);
+      promises.push(db.collection(collections[i].name).find({}).toArray());
     }
 
-    wagner.parallel(collections, function(collection, index, callback) {
-      if (collection.name === 'system.indexes') {
-        return callback(null, null);
-      }
+    let contents = yield promises;
+    let res = {};
 
-      db.collection(collection.name).find({}).toArray(function(error, docs) {
-        if (error) {
-          return callback(error);
-        }
-        _.each(docs, function(doc, index) {
-          docs[index] = ejson.inflate(doc);
-        });
-
-        callback(null, docs);
-      });
-    }, function(error, results) {
-      if (error) {
-        return callback(error);
-      }
-      var ret = {};
-      for (var i = 0; i < collections.length; ++i) {
-        if (results[i]) {
-          ret[collections[i].name] = results[i];
-        }
-      }
-      callback(null, ret);
+    filteredCollections.forEach(function(collection, i) {
+      res[collection] = contents[i];
     });
+
+    return res;
   });
-});
+}
 
 exports.push = function(uri, data, callback) {
   wagner.invokeAsync(function(error, push) {
@@ -117,8 +112,6 @@ exports.push = function(uri, data, callback) {
   }, { uri: uri, data: data });
 };
 
-exports.pull = function(uri, callback) {
-  wagner.invokeAsync(function(error, pull) {
-    callback(error, pull);
-  }, { uri: uri });
+exports.pull = function(uri) {
+  return pull(uri);
 };
