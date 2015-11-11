@@ -51,7 +51,8 @@ describe('dookie:push', function() {
       const uri = 'mongodb://localhost:27017/test';
 
       const toInsert = {
-        $test: { a: 1, b: 2 },
+        $base: { c: 1 },
+        $test: { a: 1, b: { $extend: '$base' } },
         sample: [
           { x: { $extend: '$test' } }
         ]
@@ -63,7 +64,7 @@ describe('dookie:push', function() {
       const docs = yield db.collection('sample').find({}).toArray();
 
       assert.equal(docs.length, 1);
-      assert.deepEqual(docs[0].x, { a: 1, b: 2 });
+      assert.deepEqual(docs[0].x, { a: 1, b: { c: 1 } });
 
       done();
     }).catch((error) => done(error));
