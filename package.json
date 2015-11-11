@@ -2,7 +2,7 @@
   "name": "dookie",
   "version": "0.0.6",
   "scripts": {
-    "test": "mocha ./test.js"
+    "test": "mocha ./test/*.test.js"
   },
   "dependencies": {
     "co": "4.6.0",
