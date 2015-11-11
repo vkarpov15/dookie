@@ -1,0 +1,14 @@
+people:
+  - _id:
+      # MongoDB extended JSON syntax
+      $oid: 561d87b8b260cf35147998ca
+    name: Axl Rose
+  - _id:
+      $oid: 561d88f5b260cf35147998cb
+    name: Slash
+
+bands:
+  - _id: Guns N' Roses
+    members:
+      - Axl Rose
+      - Slash

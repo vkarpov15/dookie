@@ -1,6 +1,16 @@
 {
   "name": "dookie",
   "version": "0.0.6",
+  "description": "Stylus-inspired preprocessor for MongoDB data sets and fixtures",
+  "keywords": [
+    "mongodb",
+    "fixture",
+    "fixtures",
+    "test",
+    "data",
+    "dataset",
+    "import"
+  ],
   "scripts": {
     "test": "mocha ./test/*.test.js"
   },
@@ -16,8 +26,11 @@
     "thunkify": "2.1.2"
   },
   "devDependencies": {
-    "mocha": "2.2.4",
-    "lodash": "3.10.1"
+    "acquit": "0.4.0",
+    "acquit-ignore": "0.0.3",
+    "acquit-markdown": "0.0.2",
+    "lodash": "3.10.1",
+    "mocha": "2.2.4"
   },
   "engines": {
     "node": ">= 4.0.0"

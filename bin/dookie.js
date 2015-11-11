@@ -47,7 +47,8 @@ if (cmd === 'pull') {
 
   co(function*() {
     const data = yaml.safeLoad(fs.readFileSync(commander.file));
-    yield dookie.push(`mongodb://localhost:27017/${commander.db}`, data);
+    yield dookie.push(`mongodb://localhost:27017/${commander.db}`, data,
+      commander.file);
 
     console.log('Success!');
     process.exit(0);

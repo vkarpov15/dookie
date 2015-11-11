@@ -61,7 +61,7 @@ function push(uri, data, filename) {
           dot.set(doc, key, tmp[key]);
         }
 
-        docs[i] = ejson.inflate(doc);
+        docs[i] = ejson.deflate(doc);
       }
       promises.push(db.collection(collection).insert(docs));
     }
