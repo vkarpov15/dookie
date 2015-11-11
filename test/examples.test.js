@@ -38,6 +38,8 @@ describe('Examples', function() {
       // `dookie push --db test --file ./example/basic/file.yml`
       yield dookie.push(mongodbUri, parsed);
 
+      // ------------------------
+      // Now that you've pushed, you should see the data in MongoDB
       const db = yield mongodb.MongoClient.connect(mongodbUri);
       const collections = yield db.listCollections().toArray();
       assert.equal(collections.length, 3);
