@@ -3,13 +3,15 @@
 const clone = require('clone');
 const co = require('co');
 const dot = require('dot-component');
-const emitter = require('events').EventEmitter;
 const ejson = require('mongodb-extended-json');
+const fs = require('fs');
 const mongodb = require('mongodb');
 const ns = require('mongodb-ns');
+const path = require('path');
 const thunkify = require('thunkify');
+const yaml = require('js-yaml');
 
-function push(uri, data) {
+function push(uri, data, filename) {
   return co(function*() {
     const db = yield mongodb.MongoClient.connect(uri);
 
@@ -17,9 +19,20 @@ function push(uri, data) {
     // $require
     for (const key in data) {
       if (key === '$require') {
-        const required = JSON.parse(yield thunkify(fs.readFile)(key));
-        for (const _key of required) {
-          data[_key] = required[key];
+        if (!filename) {
+          throw new Error(`Can't $require without specifying a filename`);
+        }
+
+        const directory = path.dirname(filename);
+        const extension = path.extname(filename);
+        const fileToRead = path.join(directory, data[key]);
+        const fileContents = yield thunkify(fs.readFile)(fileToRead);
+        const parsedContents = {
+          '.yml': () => yaml.safeLoad(fileContents),
+          '.json': () => JSON.parse(fileContents)
+        }[extension]();
+        for (const _key in parsedContents) {
+          data[_key] = parsedContents[_key];
         }
       }
     }
@@ -103,8 +116,8 @@ function pull(uri) {
   });
 }
 
-exports.push = function(uri, data) {
-  return push(uri, data);
+exports.push = function(uri, data, path) {
+  return push(uri, data, path);
 };
 
 exports.pull = function(uri) {

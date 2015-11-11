@@ -1,0 +1,6 @@
+$require: ./child.yml
+
+bands:
+  - name: Guns N' Roses
+    members:
+      - Axl Rose
