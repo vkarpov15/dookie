@@ -9,6 +9,7 @@ const mongodb = require('mongodb');
 const ns = require('mongodb-ns');
 const path = require('path');
 const thunkify = require('thunkify');
+const vm = require('vm');
 const yaml = require('js-yaml');
 
 function push(uri, data, filename) {
@@ -83,6 +84,10 @@ function expand(extensions, doc) {
 
   Object.keys(doc).forEach(function(key) {
     if (typeof doc[key] === 'object') {
+      if (doc[key].$eval) {
+        const context = vm.createContext(doc);
+        doc[key] = vm.runInContext(doc[key].$eval, context);
+      }
       expand(extensions, doc[key]);
     }
   });

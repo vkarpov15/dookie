@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const assert = require('assert');
 const co = require('co');
 const dookie = require('../');
@@ -87,6 +88,28 @@ describe('dookie:push', function() {
       const bands = yield db.collection('bands').find({}).toArray();
       assert.equal(bands.length, 1);
       assert.equal(bands[0].name, `Guns N' Roses`);
+
+      done();
+    }).catch((error) => done(error));
+  });
+
+  it('$eval syntax', function(done) {
+    co(function*() {
+      const uri = 'mongodb://localhost:27017/test';
+
+      const toInsert = {
+        sample: [
+          { a: 1, b: { $eval: 'this.a;' } }
+        ]
+      };
+
+      yield dookie.push(uri, toInsert);
+
+      const db = yield mongodb.MongoClient.connect(uri);
+      const docs = yield db.collection('sample').find({}).toArray();
+
+      assert.equal(docs.length, 1);
+      assert.deepEqual(_.omit(docs[0], '_id'), { a: 1, b: 1 });
 
       done();
     }).catch((error) => done(error));
