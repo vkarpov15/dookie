@@ -5,9 +5,7 @@ var mongodb = require('mongodb');
 describe('dookie:push', function() {
   it('inserts documents', function(done) {
     var uri = 'mongodb://localhost:27017/test';
-    dookie.push(uri, { 'sample': [{ x: 1 }] }, function(error, results) {
-      assert.ifError(error);
-      assert.ok(results.sample);
+    dookie.push(uri, { 'sample': [{ x: 1 }] }).then(function() {
       mongodb.MongoClient.connect(uri, function(error, db) {
         assert.ifError(error);
         db.collection('sample').find({}).toArray(function(error, docs) {
@@ -30,9 +28,7 @@ describe('dookie:push', function() {
       ]
     };
 
-    dookie.push(uri, docs, function(error, results) {
-      assert.ifError(error);
-      assert.ok(results.sample);
+    dookie.push(uri, docs).then(function() {
       mongodb.MongoClient.connect(uri, function(error, db) {
         assert.ifError(error);
         db.collection('sample').find({}).toArray(function(error, docs) {
@@ -57,9 +53,7 @@ describe('dookie:push', function() {
       ]
     };
 
-    dookie.push(uri, docs, function(error, results) {
-      assert.ifError(error);
-      assert.ok(results.sample);
+    dookie.push(uri, docs).then(function() {
       mongodb.MongoClient.connect(uri, function(error, db) {
         assert.ifError(error);
         db.collection('sample').find({}).toArray(function(error, docs) {

@@ -1,70 +1,67 @@
 'use strict';
 
-let co = require('co');
-var clone = require('clone');
-var dot = require('dot-component');
-var ejson = require('mongodb-extended-json');
-var emitter = require('events').EventEmitter;
-var mongodb = require('mongodb');
-var ns = require('mongodb-ns');
-var wagner = require('wagner-core')();
-var _ = require('underscore');
+const clone = require('clone');
+const co = require('co');
+const dot = require('dot-component');
+const emitter = require('events').EventEmitter;
+const ejson = require('mongodb-extended-json');
+const mongodb = require('mongodb');
+const ns = require('mongodb-ns');
+const thunkify = require('thunkify');
 
-wagner.task('db', function(uri, callback) {
-  mongodb.MongoClient.connect(uri, callback);
-});
+function push(uri, data) {
+  return co(function*() {
+    const db = yield mongodb.MongoClient.connect(uri);
 
-wagner.task('drop', function(db, callback) {
-  db.dropDatabase(function(error) {
-    callback(error, null);
-  });
-});
-
-wagner.task('push', function(db, drop, data, callback) {
-  var extensions = {};
-
-  for (var key in data) {
-    if (key.substr(0, '$require:'.length) === '$require:') {
-      var d = JSON.parse(fs.readFileSync(key.substr('$require:'.length)));
-      for (var key in d) {
-        if (typeof data[key] === 'undefined') {
-          data[key] = d[key];
+    yield db.dropDatabase();
+    // $require
+    for (const key in data) {
+      if (key === '$require') {
+        const required = JSON.parse(yield thunkify(fs.readFile)(key));
+        for (const _key of required) {
+          data[_key] = required[key];
         }
       }
     }
-  }
 
-  for (var key in data) {
-    if (key[0] !== '$') {
-      continue;
+    // extensions
+    let extensions = {};
+    for (const key in data) {
+      if (key[0] !== '$') {
+        continue;
+      }
+      extensions[key] = data[key];
+      delete data[key];
     }
 
-    extensions[key] = data[key];
-    delete data[key];
-  }
-
-  wagner.parallel(data, function(docs, collection, callback) {
-    _.each(docs, function(doc, index) {
-      expand(extensions, doc);
-      if (doc.$set) {
-        var tmp = doc.$set;
+    // insert
+    let promises = [];
+    for (const collection in data) {
+      let docs = data[collection];
+      for (let i = 0; i < docs.length; ++i) {
+        const doc = docs[i];
+        expand(extensions, doc);
+        const tmp = doc.$set;
         delete doc.$set;
-        for (var key in tmp) {
+        for (const key in tmp) {
           dot.set(doc, key, tmp[key]);
         }
-      }
 
-      docs[index] = ejson.deflate(doc);
-    });
-    db.collection(collection).insert(docs, callback);
-  }, callback);
-});
+        docs[i] = ejson.inflate(doc);
+      }
+      promises.push(db.collection(collection).insert(docs));
+    }
+
+    const res = yield promises;
+    return res;
+  });
+}
 
 function expand(extensions, doc) {
   if (doc.$extend) {
-    var tmp = doc.$extend;
+    const tmp = doc.$extend;
     delete doc.$extend;
-    for (var key in extensions[tmp]) {
+    for (const key in extensions[tmp]) {
       if (typeof doc[key] === 'undefined') {
         doc[key] = clone(extensions[tmp][key]);
       }
@@ -80,9 +77,9 @@ function expand(extensions, doc) {
 
 function pull(uri) {
   return co(function*() {
-    let db = yield mongodb.MongoClient.connect(uri);
+    const db = yield mongodb.MongoClient.connect(uri);
 
-    let collections = yield db.listCollections().toArray();
+    const collections = yield db.listCollections().toArray();
 
     let promises = [];
     let filteredCollections = [];
@@ -95,7 +92,7 @@ function pull(uri) {
       promises.push(db.collection(collections[i].name).find({}).toArray());
     }
 
-    let contents = yield promises;
+    const contents = yield promises;
     let res = {};
 
     filteredCollections.forEach(function(collection, i) {
@@ -106,10 +103,8 @@ function pull(uri) {
   });
 }
 
-exports.push = function(uri, data, callback) {
-  wagner.invokeAsync(function(error, push) {
-    callback(error, push);
-  }, { uri: uri, data: data });
+exports.push = function(uri, data) {
+  return push(uri, data);
 };
 
 exports.pull = function(uri) {

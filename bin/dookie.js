@@ -48,12 +48,17 @@ if (cmd === 'pull') {
     commander.db);
   var data = yaml.safeLoad(fs.readFileSync(commander.file));
 
-  dookie.push('mongodb://localhost:27017/' + commander.db, data, function(error, data) {
-    if (error) {
-      console.log('Error writing data: ' + error);
+  dookie.push('mongodb://localhost:27017/' + commander.db, data).
+    then(() => {
+      if (error) {
+        console.log('Error writing data: ' + error);
+        process.exit(1);
+      }
+      console.log('Success!');
+      process.exit(0);
+    }).
+    catch((error) => {
+      console.log('Error reading data', error);
       process.exit(1);
-    }
-    console.log('Success!');
-    process.exit(0);
-  });
+    });
 }
