@@ -99,11 +99,23 @@ to re-use between data sets. For instance, you may want a common collection
 of users for your data sets. Dookie provides a `$require` keyword just
 for that. Suppose you have a file called `parent.yml`:
 
-@import:example/basic/parent.yml
+```yaml
+$require: ./child.yml
+
+bands:
+  - _id: Guns N' Roses
+    members:
+      - Axl Rose
+
+```
 
 This file does a `$require` on `child.yml`, which looks like this:
 
-@import:example/basic/child.yml
+```yaml
+people:
+  - _id: Axl Rose
+
+```
 
 When you push `parent.yml`, dookie will pull in the 'people' collection
 from `child.yml` as well.

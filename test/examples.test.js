@@ -74,11 +74,11 @@ describe('Examples', function() {
    * of users for your data sets. Dookie provides a `$require` keyword just
    * for that. Suppose you have a file called `parent.yml`:
    *
-   * @import:example/basic/parent.yml
+   * @import:example/$require/parent.yml
    *
    * This file does a `$require` on `child.yml`, which looks like this:
    *
-   * @import:example/basic/child.yml
+   * @import:example/$require/child.yml
    *
    * When you push `parent.yml`, dookie will pull in the 'people' collection
    * from `child.yml` as well.

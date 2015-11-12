@@ -10,7 +10,7 @@ const header = fs.readFileSync('./HEADER.md', 'utf8');
 let markdown =
   acquit.parse(fs.readFileSync('./test/examples.test.js', 'utf8'));
 
-const re = new RegExp('@import:[\\S]+');
+const re = new RegExp('@import:[\\S]+', 'g');
 markdown.match(re).forEach(function(statement) {
   const file = statement.substr('@import:'.length);
   const data = fs.readFileSync(file, 'utf8');
