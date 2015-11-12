@@ -218,7 +218,7 @@ people:
       const mongodbUri = 'mongodb://localhost:27017/test';
       // Insert data into dookie
       // Or, at the command line:
-      // `dookie push --db test --file ./example/$extend.yml`
+      // `dookie push --db test --file ./example/$eval.yml`
       yield dookie.push(mongodbUri, parsed, filename);
 
       // ------------------------
@@ -227,6 +227,34 @@ people:
 
       const people = yield db.collection('people').find().toArray();
       assert.deepEqual(people, [
+        { _id: 0, firstName: 'Axl', lastName: 'Rose', name: 'Axl Rose' }
+      ]);
+    })
+  
+```
+
+## It can pull() data out of MongoDB
+
+The above examples show how dookie can `push()` data into MongoDB. Dookie
+can also `pull()` data out of MongoDB in JSON format. Why not just use
+mongoexport or mongodump? Mongoexport can only export a single collection,
+mongodump exports hard-to-read binary data, and neither can be run from
+Node without `.exec()`. Dookie lets you transfer whole databases in
+a human readable format, and `assert()` on the entire state of your
+database in tests with ease.
+
+
+```javascript
+
+    co(function*() {
+      const mongodbUri = 'mongodb://localhost:27017/test';
+      // Insert data into dookie
+      // Or, at the command line:
+      // `dookie pull --db test --file ./output.json`
+      const json = yield dookie.pull(mongodbUri);
+
+      assert.deepEqual(Object.keys(json), ['people']);
+      assert.deepEqual(json.people, [
         { _id: 0, firstName: 'Axl', lastName: 'Rose', name: 'Axl Rose' }
       ]);
     })
