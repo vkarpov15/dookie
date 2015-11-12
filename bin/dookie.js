@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
+const co = require('co');
 const commander = require('commander');
 const dookie = require('../');
 const fs = require('fs');
