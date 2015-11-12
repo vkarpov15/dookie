@@ -1,0 +1,8 @@
+$gnrMember:
+  band: Guns N' Roses
+
+people:
+  - $extend: $gnrMember
+    _id: Axl Rose
+  - _id: Slash
+    $extend: $gnrMember

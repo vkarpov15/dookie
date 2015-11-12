@@ -4,7 +4,7 @@
 
 Dookie lets you write MongoDB test fixtures in JSON or
 [YAML](https://en.wikipedia.org/wiki/YAML) with extra syntactic sugar
-(extended JSON, variables, imports, etc.).
+(extended JSON, variables, imports, inheritance, etc.).
 
 **Note:** Dookie requires Node >= 4.0.0. Dookie is **not** tested with nor
 expected to work with Node 0.x or io.js.
@@ -145,6 +145,56 @@ from `child.yml` as well.
       const bands = yield db.collection('bands').find().toArray();
       assert.deepEqual(bands, [
         { _id: `Guns N' Roses`, members: ['Axl Rose'] }
+      ]);
+    })
+  
+```
+
+## It supports inheritance via $extend
+
+acquit:ignore:end
+
+
+You can also re-use objects using the `$extend` keyword. Suppose each
+person in the 'people' collection should have a parent pointer to the
+band they're a part of. You can save yourself some copy/paste by using
+`$extend`:
+
+```yaml
+$gnrMember:
+  band: Guns N' Roses
+
+people:
+  - $extend: $gnrMember
+    _id: Axl Rose
+  - _id: Slash
+    $extend: $gnrMember
+
+```
+
+
+```javascript
+
+    co(function*() {
+
+      const filename = './example/$extend.yml';
+      const contents = fs.readFileSync(filename);
+      const parsed = yaml.safeLoad(contents);
+
+      const mongodbUri = 'mongodb://localhost:27017/test';
+      // Insert data into dookie
+      // Or, at the command line:
+      // `dookie push --db test --file ./example/$extend.yml`
+      yield dookie.push(mongodbUri, parsed, filename);
+
+      // ------------------------
+      // Now that you've pushed, you should see the data in MongoDB
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+
+      const people = yield db.collection('people').find().toArray();
+      assert.deepEqual(people, [
+        { band: `Guns N' Roses`, _id: 'Axl Rose' },
+        { band: `Guns N' Roses`, _id: 'Slash' }
       ]);
     })
   
