@@ -90,7 +90,6 @@ describe('Examples', function() {
       const fs = require('fs');
       const yaml = require('js-yaml');
       // acquit:ignore:end
-
       const filename = './example/$require/parent.yml';
       const contents = fs.readFileSync(filename);
       const parsed = yaml.safeLoad(contents);
@@ -136,7 +135,6 @@ describe('Examples', function() {
       const fs = require('fs');
       const yaml = require('js-yaml');
       // acquit:ignore:end
-
       const filename = './example/$extend.yml';
       const contents = fs.readFileSync(filename);
       const parsed = yaml.safeLoad(contents);
@@ -155,6 +153,46 @@ describe('Examples', function() {
       assert.deepEqual(people, [
         { band: `Guns N' Roses`, _id: 'Axl Rose' },
         { band: `Guns N' Roses`, _id: 'Slash' }
+      ]);
+      // acquit:ignore:start
+      done();
+      // acquit:ignore:end
+    })
+    // acquit:ignore:start
+    .catch((error) => done(error));
+    // acquit:ignore:end
+  });
+
+  /**
+   * Dookie also lets you evaluate code in your YAML. The code runs with the
+   * current document as the context.
+   *
+   * @import:example/$eval.yml
+   */
+
+  it('can evaluate code with $eval', function(done) {
+    co(function*() {
+      // acquit:ignore:start
+      const fs = require('fs');
+      const yaml = require('js-yaml');
+      // acquit:ignore:end
+      const filename = './example/$eval.yml';
+      const contents = fs.readFileSync(filename);
+      const parsed = yaml.safeLoad(contents);
+
+      const mongodbUri = 'mongodb://localhost:27017/test';
+      // Insert data into dookie
+      // Or, at the command line:
+      // `dookie push --db test --file ./example/$extend.yml`
+      yield dookie.push(mongodbUri, parsed, filename);
+
+      // ------------------------
+      // Now that you've pushed, you should see the data in MongoDB
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+
+      const people = yield db.collection('people').find().toArray();
+      assert.deepEqual(people, [
+        { _id: 0, firstName: 'Axl', lastName: 'Rose', name: 'Axl Rose' }
       ]);
       // acquit:ignore:start
       done();

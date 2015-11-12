@@ -91,9 +91,6 @@ Dookie can push this file to MongoDB for you.
 
 ## It can $require external files
 
-acquit:ignore:end
-
-
 Suppose you're a more advanced user and have some collections you want
 to re-use between data sets. For instance, you may want a common collection
 of users for your data sets. Dookie provides a `$require` keyword just
@@ -124,7 +121,6 @@ from `child.yml` as well.
 ```javascript
 
     co(function*() {
-
       const filename = './example/$require/parent.yml';
       const contents = fs.readFileSync(filename);
       const parsed = yaml.safeLoad(contents);
@@ -152,9 +148,6 @@ from `child.yml` as well.
 
 ## It supports inheritance via $extend
 
-acquit:ignore:end
-
-
 You can also re-use objects using the `$extend` keyword. Suppose each
 person in the 'people' collection should have a parent pointer to the
 band they're a part of. You can save yourself some copy/paste by using
@@ -176,7 +169,6 @@ people:
 ```javascript
 
     co(function*() {
-
       const filename = './example/$extend.yml';
       const contents = fs.readFileSync(filename);
       const parsed = yaml.safeLoad(contents);
@@ -195,6 +187,47 @@ people:
       assert.deepEqual(people, [
         { band: `Guns N' Roses`, _id: 'Axl Rose' },
         { band: `Guns N' Roses`, _id: 'Slash' }
+      ]);
+    })
+  
+```
+
+## It can evaluate code with $eval
+
+Dookie also lets you evaluate code in your YAML. The code runs with the
+current document as the context.
+
+```yaml
+people:
+  - _id: 0
+    firstName: Axl
+    lastName: Rose
+    name:
+      $eval: this.firstName + ' ' + this.lastName
+
+```
+
+
+```javascript
+
+    co(function*() {
+      const filename = './example/$eval.yml';
+      const contents = fs.readFileSync(filename);
+      const parsed = yaml.safeLoad(contents);
+
+      const mongodbUri = 'mongodb://localhost:27017/test';
+      // Insert data into dookie
+      // Or, at the command line:
+      // `dookie push --db test --file ./example/$extend.yml`
+      yield dookie.push(mongodbUri, parsed, filename);
+
+      // ------------------------
+      // Now that you've pushed, you should see the data in MongoDB
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+
+      const people = yield db.collection('people').find().toArray();
+      assert.deepEqual(people, [
+        { _id: 0, firstName: 'Axl', lastName: 'Rose', name: 'Axl Rose' }
       ]);
     })
   

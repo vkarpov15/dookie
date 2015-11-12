@@ -1,0 +1,6 @@
+people:
+  - _id: 0
+    firstName: Axl
+    lastName: Rose
+    name:
+      $eval: this.firstName + ' ' + this.lastName
