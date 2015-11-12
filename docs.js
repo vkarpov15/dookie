@@ -14,7 +14,7 @@ const re = new RegExp('@import:[\\S]+');
 markdown.match(re).forEach(function(statement) {
   const file = statement.substr('@import:'.length);
   const data = fs.readFileSync(file, 'utf8');
-  markdown = markdown.replace(statement, '```\n' + data + '\n```');
+  markdown = markdown.replace(statement, '```yaml\n' + data + '\n```');
 });
 
 fs.writeFileSync('./README.md', `${header}\n\n${markdown}`);

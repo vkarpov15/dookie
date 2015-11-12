@@ -87,7 +87,7 @@ describe('dookie:push', function() {
 
       const bands = yield db.collection('bands').find({}).toArray();
       assert.equal(bands.length, 1);
-      assert.equal(bands[0].name, `Guns N' Roses`);
+      assert.equal(bands[0]._id, `Guns N' Roses`);
 
       done();
     }).catch((error) => done(error));

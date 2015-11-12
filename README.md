@@ -29,7 +29,7 @@ push functionality with the `require('dookie').push()` function, or
 
 Suppose you have a YAML file called `file.yml` that looks like below.
 
-```
+```yaml
 people:
   - _id:
       # MongoDB extended JSON syntax
@@ -84,6 +84,55 @@ Dookie can push this file to MongoDB for you.
       const bands = yield db.collection('bands').find().toArray();
       assert.deepEqual(bands, [
         { _id: `Guns N' Roses`, members: ['Axl Rose', 'Slash'] }
+      ]);
+    })
+  
+```
+
+## It can $require external files
+
+acquit:ignore:end
+
+
+Suppose you're a more advanced user and have some collections you want
+to re-use between data sets. For instance, you may want a common collection
+of users for your data sets. Dookie provides a `$require` keyword just
+for that. Suppose you have a file called `parent.yml`:
+
+@import:example/basic/parent.yml
+
+This file does a `$require` on `child.yml`, which looks like this:
+
+@import:example/basic/child.yml
+
+When you push `parent.yml`, dookie will pull in the 'people' collection
+from `child.yml` as well.
+
+
+```javascript
+
+    co(function*() {
+
+      const filename = './example/$require/parent.yml';
+      const contents = fs.readFileSync(filename);
+      const parsed = yaml.safeLoad(contents);
+
+      const mongodbUri = 'mongodb://localhost:27017/test';
+      // Insert data into dookie
+      // Or, at the command line:
+      // `dookie push --db test --file ./example/basic/parent.yml`
+      yield dookie.push(mongodbUri, parsed, filename);
+
+      // ------------------------
+      // Now that you've pushed, you should see the data in MongoDB
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+
+      const people = yield db.collection('people').find().toArray();
+      assert.deepEqual(people, [{ _id: 'Axl Rose' }]);
+
+      const bands = yield db.collection('bands').find().toArray();
+      assert.deepEqual(bands, [
+        { _id: `Guns N' Roses`, members: ['Axl Rose'] }
       ]);
     })
   

@@ -1,6 +1,6 @@
 $require: ./child.yml
 
 bands:
-  - name: Guns N' Roses
+  - _id: Guns N' Roses
     members:
       - Axl Rose
