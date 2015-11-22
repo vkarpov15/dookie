@@ -31,8 +31,7 @@ if (!commander.db) {
 }
 
 if (cmd === 'pull') {
-  console.log('Writing data from ' + commander.db + ' to ' +
-    commander.file);
+  console.log(`Writing data from ${commander.db} to ${commander.file}`);
   co(function*() {
     const res = yield dookie.pull(`mongodb://localhost:27017/${commander.db}`);
     fs.writeFileSync(commander.file, JSON.stringify(data, null, '  '));
@@ -43,8 +42,7 @@ if (cmd === 'pull') {
     process.exit(1);
   });
 } else {
-  console.log('Writing data from ' + commander.file + ' to ' +
-    commander.db);
+  console.log(`Writing data from ${commander.file} to ${commander.db}`);
 
   co(function*() {
     const data = yaml.safeLoad(fs.readFileSync(commander.file));
