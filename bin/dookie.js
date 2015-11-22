@@ -41,7 +41,7 @@ if (cmd === 'pull') {
     console.log('Error reading data:', error);
     process.exit(1);
   });
-} else {
+} else if (cmd === 'push') {
   console.log(`Writing data from ${commander.file} to ${commander.db}`);
 
   co(function*() {
@@ -55,4 +55,7 @@ if (cmd === 'pull') {
     console.log('Error writing data', error);
     process.exit(1);
   });
+} else {
+  console.log(`Invalid command ${cmd}: must be 'push' or 'pull'`);
+  process.exit(1);
 }
