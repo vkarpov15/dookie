@@ -114,7 +114,7 @@ function pull(uri) {
     let res = {};
 
     filteredCollections.forEach(function(collection, i) {
-      res[collection] = contents[i];
+      res[collection] = contents[i].map(function(doc) { return ejson.inflate(doc); });
     });
 
     return res;

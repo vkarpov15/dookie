@@ -130,6 +130,7 @@ describe('dookie:pull', function() {
       assert.equal(Object.keys(results).length, 1);
       assert.equal(results.sample.length, 1);
       assert.equal(results.sample[0].x, 1);
+      assert.ok(results.sample[0]._id.$oid);
 
       done();
     }).catch((error) => done(error));
