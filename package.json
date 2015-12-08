@@ -35,5 +35,9 @@
   "engines": {
     "node": ">= 4.0.0"
   },
-  "bin": "./bin/dookie.js"
+  "bin": "./bin/dookie.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vkarpov15/dookie.git"
+  }
 }
