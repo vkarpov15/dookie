@@ -11,6 +11,7 @@ commander.
   usage('dookie (pull|push) --file <file> --db <database name>').
   option('-f, --file <file>', 'File to read/write from').
   option('-d, --db <database>', 'Database to read/write from').
+  option('-u, --uri <uri>', 'MongoDB URI to use (mongodb://localhost:27017 by default)').
   parse(process.argv);
 
 const cmd = process.argv[2];
@@ -45,8 +46,9 @@ if (cmd === 'pull') {
   console.log(`Writing data from ${commander.file} to ${commander.db}`);
 
   co(function*() {
+    const uri = commander.uri || 'mongodb://localhost:27017';
     const data = yaml.safeLoad(fs.readFileSync(commander.file));
-    yield dookie.push(`mongodb://localhost:27017/${commander.db}`, data,
+    yield dookie.push(`${uri}/${commander.db}`, data,
       commander.file);
 
     console.log('Success!');
