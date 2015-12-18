@@ -57,7 +57,4 @@ if (cmd === 'pull') {
     console.log('Error writing data', error);
     process.exit(1);
   });
-} else {
-  console.log(`Invalid command ${cmd}: must be 'push' or 'pull'`);
-  process.exit(1);
 }
