@@ -46,7 +46,7 @@ if (cmd === 'pull') {
   console.log(`Writing data from ${commander.file} to ${commander.db}`);
 
   co(function*() {
-    const uri = commander.uri || 'mongodb://localhost:27017/${commander.db}';
+    const uri = commander.uri || `mongodb://localhost:27017/${commander.db}`;
     const data = yaml.safeLoad(fs.readFileSync(commander.file));
     yield dookie.push(uri, data,
       commander.file);
