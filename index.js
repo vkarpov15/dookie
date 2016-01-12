@@ -33,7 +33,12 @@ function push(uri, data, filename) {
           '.json': () => JSON.parse(fileContents)
         }[extension]();
         for (const _key in parsedContents) {
-          data[_key] = parsedContents[_key];
+          if (data[_key] && !_key.startsWith('$') &&
+              Array.isArray(data[_key]) && Array.isArray(parsedContents[_key])) {
+            data[_key] = parsedContents[_key].concat(data[_key]);
+          } else {
+            data[_key] = parsedContents[_key]; 
+          }
         }
       }
     }
