@@ -32,9 +32,10 @@ if (!commander.db) {
 }
 
 if (cmd === 'pull') {
-  console.log(`Writing data from ${commander.db} to ${commander.file}`);
+  const uri = commander.uri || `mongodb://localhost:27017/${commander.db}`;
+  console.log(`Writing data from ${uri} to ${commander.file}`);
   co(function*() {
-    const res = yield dookie.pull(`mongodb://localhost:27017/${commander.db}`);
+    const res = yield dookie.pull(uri);
     fs.writeFileSync(commander.file, JSON.stringify(res, null, '  '));
     process.exit(0);
   }).
