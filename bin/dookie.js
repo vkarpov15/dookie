@@ -5,6 +5,7 @@ const co = require('co');
 const commander = require('commander');
 const dookie = require('../');
 const fs = require('fs');
+const path = require('path');
 const yaml = require('js-yaml');
 
 commander.
@@ -48,7 +49,12 @@ if (cmd === 'pull') {
 
   co(function*() {
     const uri = commander.uri || `mongodb://localhost:27017/${commander.db}`;
-    const data = yaml.safeLoad(fs.readFileSync(commander.file));
+    let data;
+    if (path.extname(commander.file) === '.json') {
+      data = JSON.parse(fs.readFileSync(commander.file));
+    } else {
+      data = yaml.safeLoad(fs.readFileSync(commander.file));
+    }
     yield dookie.push(uri, data,
       commander.file);
 
