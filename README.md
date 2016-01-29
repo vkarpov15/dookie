@@ -68,12 +68,11 @@ Dookie can push this file to MongoDB for you.
       // ------------------------
       // Now that you've pushed, you should see the data in MongoDB
       const db = yield mongodb.MongoClient.connect(mongodbUri);
-      const collections = yield db.listCollections().toArray();
-      assert.equal(collections.length, 3);
-      assert.equal(collections[0].name, 'bands');
-      assert.equal(collections[1].name, 'people');
-      // MongoDB built-in collection
-      assert.equal(collections[2].name, 'system.indexes');
+      const collections = (yield db.listCollections().toArray()).
+        map(v => v.name).filter(v => !v.startsWith('system.')).sort();
+      assert.equal(collections.length, 2);
+      assert.equal(collections[0], 'bands');
+      assert.equal(collections[1], 'people');
 
       const people = yield db.collection('people').find().toArray();
       people.forEach((person) => { person._id = person._id.toString() });

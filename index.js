@@ -57,6 +57,9 @@ function push(uri, data, filename) {
     let promises = [];
     for (const collection in data) {
       let docs = data[collection];
+      if (docs.length === 0) {
+        continue;
+      }
       for (let i = 0; i < docs.length; ++i) {
         const doc = docs[i];
         expand(extensions, doc);
@@ -88,7 +91,7 @@ function expand(extensions, doc) {
   }
 
   Object.keys(doc).forEach(function(key) {
-    if (typeof doc[key] === 'object') {
+    if (doc[key] && typeof doc[key] === 'object') {
       if (doc[key].$eval) {
         const context = vm.createContext(doc);
         doc[key] = vm.runInContext(doc[key].$eval, context);
