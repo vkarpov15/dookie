@@ -27,8 +27,8 @@ if (!commander.file) {
   process.exit(1);
 }
 
-if (!commander.db) {
-  console.log('Must specify --db');
+if (!commander.db && !commander.uri) {
+  console.log('Must specify --db or --uri');
   process.exit(1);
 }
 
