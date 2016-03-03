@@ -93,7 +93,9 @@ function expand(extensions, doc) {
   Object.keys(doc).forEach(function(key) {
     if (doc[key] && typeof doc[key] === 'object') {
       if (doc[key].$eval) {
-        const context = vm.createContext(doc);
+        const _doc = clone(doc);
+        _doc.require = v => require(v);
+        const context = vm.createContext(_doc);
         doc[key] = vm.runInContext(doc[key].$eval, context);
       }
       expand(extensions, doc[key]);
