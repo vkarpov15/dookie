@@ -9,6 +9,7 @@ Dookie lets you write MongoDB test fixtures in JSON or
 **Note:** Dookie requires Node >= 4.0.0. Dookie is **not** tested with nor
 expected to work with Node 0.x or io.js.
 
+[![Circle CI](https://circleci.com/gh/vkarpov15/dookie.svg?style=svg)](https://circleci.com/gh/vkarpov15/dookie)
 
 # Examples
 
