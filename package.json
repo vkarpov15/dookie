@@ -22,7 +22,7 @@
     "js-yaml": "3.2.1",
     "mongodb": "~2.1.0",
     "mongodb-extended-json": "1.6.3",
-    "mongodb-ns": "1.0.0",
+    "mongodb-ns": "1.0.3",
     "thunkify": "2.1.2"
   },
   "devDependencies": {
