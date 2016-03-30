@@ -114,6 +114,26 @@ describe('dookie:push', function() {
       done();
     }).catch((error) => done(error));
   });
+
+  it('dropDatabase option', function(done) {
+    co(function*() {
+      const uri = 'mongodb://localhost:27017/test';
+
+      const toInsert = {
+        sample: [
+          { a: 1 }
+        ]
+      };
+
+      yield dookie.push(uri, _.cloneDeep(toInsert));
+      yield dookie.push(uri, _.cloneDeep(toInsert), { dropDatabase: false });
+
+      const db = yield mongodb.MongoClient.connect(uri);
+      const docs = yield db.collection('sample').find({}).toArray();
+      assert.equal(docs.length, 2);
+      done();
+    }).catch(done);
+  });
 });
 
 describe('dookie:pull', function() {

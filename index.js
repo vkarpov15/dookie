@@ -12,14 +12,29 @@ const thunkify = require('thunkify');
 const vm = require('vm');
 const yaml = require('js-yaml');
 
-function push(uri, data, filename) {
+function standardizePushOptions(options) {
+  if (!options) {
+    return {};
+  }
+  if (typeof options === 'string') {
+    return { filename: options };
+  }
+  return clone(options);
+}
+
+function push(uri, data, options) {
   return co(function*() {
     const db = yield mongodb.MongoClient.connect(uri);
+    options = standardizePushOptions(options);
 
-    yield db.dropDatabase();
+    if (options.dropDatabase !== false) {
+      yield db.dropDatabase();
+    }
+
     // $require
     for (const key in data) {
       if (key === '$require') {
+        const filename = options.filename;
         if (!filename) {
           throw new Error(`Can't $require without specifying a filename`);
         }
