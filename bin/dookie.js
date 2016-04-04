@@ -39,7 +39,8 @@ if (cmd === 'pull') {
   co(function*() {
     const res = yield dookie.pull(uri);
     const stringify = JSONStream.stringifyObject();
-    stringify.pipe(fs.createWriteStream(commander.file)).on('end', () => { process.exit(0); });
+    stringify.pipe(fs.createWriteStream(commander.file)).on('finish', () => { process.exit(0); }).
+      on('error', error => { console.error(error.stack); process.exit(1); });
     for (const coll in res) {
       stringify.write([coll, res[coll]]);
     }
