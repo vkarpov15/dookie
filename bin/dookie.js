@@ -41,7 +41,7 @@ if (cmd === 'pull') {
     process.exit(0);
   }).
   catch(function(error) {
-    console.log('Error reading data:', error);
+    console.log('Error reading data:', error.stack);
     process.exit(1);
   });
 } else if (cmd === 'push') {
@@ -61,7 +61,7 @@ if (cmd === 'pull') {
     console.log('Success!');
     process.exit(0);
   }).catch(function(error) {
-    console.log('Error writing data', error);
+    console.log('Error writing data', error.stack);
     process.exit(1);
   });
 }
