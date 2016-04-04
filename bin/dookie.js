@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
+const JSONStream = require('JSONStream');
 const co = require('co');
 const commander = require('commander');
 const dookie = require('../');
@@ -37,8 +38,12 @@ if (cmd === 'pull') {
   console.log(`Writing data from ${uri} to ${commander.file}`);
   co(function*() {
     const res = yield dookie.pull(uri);
-    fs.writeFileSync(commander.file, JSON.stringify(res, null, '  '));
-    process.exit(0);
+    const stringify = JSONStream.stringifyObject();
+    stringify.pipe(fs.createWriteStream(commander.file)).on('end', () => { process.exit(0); });
+    for (const coll in res) {
+      stringify.write([coll, res[coll]]);
+    }
+    stringify.end();
   }).
   catch(function(error) {
     console.log('Error reading data:', error.stack);
