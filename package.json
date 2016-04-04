@@ -1,6 +1,6 @@
 {
   "name": "dookie",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Stylus-inspired preprocessor for MongoDB data sets and fixtures",
   "keywords": [
     "mongodb",
