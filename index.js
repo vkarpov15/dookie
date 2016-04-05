@@ -52,7 +52,7 @@ function push(uri, data, options) {
               Array.isArray(data[_key]) && Array.isArray(parsedContents[_key])) {
             data[_key] = parsedContents[_key].concat(data[_key]);
           } else {
-            data[_key] = parsedContents[_key]; 
+            data[_key] = parsedContents[_key];
           }
         }
       }
@@ -146,6 +146,38 @@ function pull(uri) {
   });
 }
 
+function pullToStream(uri, stream) {
+  return co(function*() {
+    const db = yield mongodb.MongoClient.connect(uri);
+    const collections = db.listCollections();
+    stream.write(`{\n`);
+    let first = true;
+    for (let collection = yield collections.next();
+        collection != null;
+        collection = yield collections.next()) {
+      let namespace = ns(`test.${collection.name}`);
+      if (namespace.system || namespace.oplog || namespace.special) {
+        continue;
+      }
+      if (!first) {
+        stream.write(',\n');
+        first = false;
+      }
+      stream.write(`"${collection.name}": [\n`);
+
+      const cursor = db.collection(collection.name).find();
+      for (let doc = yield cursor.next();
+          doc != null;
+          doc = yield cursor.next()) {
+        stream.write(JSON.stringify(ejson.inflate(doc), null, '  '));
+      }
+
+      stream.write(`\n]`);
+    }
+    stream.write(`\n}`);
+  });
+}
+
 exports.push = function(uri, data, path) {
   return push(uri, data, path);
 };
@@ -153,3 +185,5 @@ exports.push = function(uri, data, path) {
 exports.pull = function(uri) {
   return pull(uri);
 };
+
+exports.pullToStream = pullToStream;

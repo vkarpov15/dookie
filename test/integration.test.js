@@ -6,6 +6,7 @@ const co = require('co');
 const dookie = require('../');
 const fs = require('fs');
 const mongodb = require('mongodb');
+const stream = require('stream');
 const yaml = require('js-yaml');
 
 describe('dookie:push', function() {
@@ -151,6 +152,34 @@ describe('dookie:pull', function() {
       assert.equal(results.sample.length, 1);
       assert.equal(results.sample[0].x, 1);
       assert.ok(results.sample[0]._id.$oid);
+
+      done();
+    }).catch((error) => done(error));
+  });
+});
+
+describe('dookie:pullToStream', function() {
+  it('writes JSON to stream', function(done) {
+    co(function*() {
+      const uri = 'mongodb://localhost:27017/test3';
+
+      const db = yield mongodb.MongoClient.connect(uri);
+      yield db.dropDatabase();
+      yield db.collection('sample').insert({ x: 1 });
+
+      const ws = new stream.Writable();
+      let str = '';
+      ws._write = (chunk, enc, next) => {
+        str += chunk.toString('utf8');
+        next();
+      };
+      const results = yield dookie.pullToStream(uri, ws);
+
+      assert.ok(str);
+      const streamed = JSON.parse(str);
+      assert.deepEqual(Object.keys(streamed), ['sample']);
+      assert.equal(streamed['sample'].length, 1);
+      assert.deepEqual(_.omit(streamed['sample'][0], '_id'), { x: 1 });
 
       done();
     }).catch((error) => done(error));
