@@ -84,7 +84,7 @@ function push(uri, data, options) {
           dot.set(doc, key, tmp[key]);
         }
 
-        docs[i] = ejson.deflate(doc);
+        docs[i] = ejson.deserialize(doc);
       }
       promises.push(db.collection(collection).insert(docs));
     }
@@ -139,7 +139,7 @@ function pull(uri) {
     let res = {};
 
     filteredCollections.forEach(function(collection, i) {
-      res[collection] = contents[i].map(function(doc) { return ejson.inflate(doc); });
+      res[collection] = contents[i].map(doc => ejson.serialize(doc));
     });
 
     return res;
@@ -169,7 +169,7 @@ function pullToStream(uri, stream) {
       for (let doc = yield cursor.next();
           doc != null;
           doc = yield cursor.next()) {
-        stream.write(JSON.stringify(ejson.inflate(doc), null, '  '));
+        stream.write(JSON.stringify(ejson.serialize(doc), null, '  '));
       }
 
       stream.write(`\n]`);
