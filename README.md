@@ -17,7 +17,7 @@ expected to work with Node 0.x or io.js.
 Dookie can be used either via `require('dookie');` in Node.js, or from the
 command line as an executable. Dookie's fundamental operations are:
 
-1. Push - clear out a database and insert some data
+1. Push - optionally clear out a database and insert some data
 2. Pull - write the contents of a database to a file
 
 Push is more interesting, so let's start with that. You can access the

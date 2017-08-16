@@ -13,7 +13,7 @@ describe('dookie:push', function() {
   it('inserts documents', function(done) {
     co(function*() {
       const uri = 'mongodb://localhost:27017/test';
-      yield dookie.push(uri, { 'sample': [{ x: 1 }] });
+      yield dookie.push(uri, { 'sample': [{ x: 1 }] }, { dropDatabase: true });
 
       const db = yield mongodb.MongoClient.connect(uri);
       const docs = yield db.collection('sample').find({}).toArray();
@@ -35,7 +35,7 @@ describe('dookie:push', function() {
         ]
       };
 
-      yield dookie.push(uri, toInsert);
+      yield dookie.push(uri, toInsert, { dropDatabase: true });
 
       const db = yield mongodb.MongoClient.connect(uri);
       const docs = yield db.collection('sample').find({}).toArray();
@@ -60,7 +60,7 @@ describe('dookie:push', function() {
         ]
       };
 
-      yield dookie.push(uri, toInsert);
+      yield dookie.push(uri, toInsert, { dropDatabase: true });
 
       const db = yield mongodb.MongoClient.connect(uri);
       const docs = yield db.collection('sample').find({}).toArray();
@@ -79,7 +79,7 @@ describe('dookie:push', function() {
       const path = './example/$require/parent.yml';
       const toInsert = yaml.safeLoad(fs.readFileSync(path));
 
-      yield dookie.push(uri, toInsert, path);
+      yield dookie.push(uri, toInsert, path, { dropDatabase: true });
 
       const db = yield mongodb.MongoClient.connect(uri);
       const people = yield db.collection('people').find({}).toArray();
@@ -104,7 +104,7 @@ describe('dookie:push', function() {
         ]
       };
 
-      yield dookie.push(uri, toInsert);
+      yield dookie.push(uri, toInsert, { dropDatabase: true });
 
       const db = yield mongodb.MongoClient.connect(uri);
       const docs = yield db.collection('sample').find({}).toArray();
@@ -126,8 +126,8 @@ describe('dookie:push', function() {
         ]
       };
 
+      yield dookie.push(uri, _.cloneDeep(toInsert), { dropDatabase: true });
       yield dookie.push(uri, _.cloneDeep(toInsert));
-      yield dookie.push(uri, _.cloneDeep(toInsert), { dropDatabase: false });
 
       const db = yield mongodb.MongoClient.connect(uri);
       const docs = yield db.collection('sample').find({}).toArray();
