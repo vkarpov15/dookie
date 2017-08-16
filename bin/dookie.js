@@ -14,6 +14,7 @@ commander.
   option('-f, --file <file>', 'File to read/write from').
   option('-d, --db <database>', 'Database to read/write from').
   option('-u, --uri <uri>', 'MongoDB URI to use (mongodb://localhost:27017 by default)').
+  option('--dropDatabase', 'Drop database when pushing').
   parse(process.argv);
 
 const cmd = process.argv[2];
@@ -67,8 +68,9 @@ if (cmd === 'pull') {
     } else {
       data = yaml.safeLoad(fs.readFileSync(commander.file));
     }
+
     yield dookie.push(uri, data,
-      commander.file);
+      { filename: commander.file, dropDatabase: commander.dropDatabase });
 
     console.log('Success!');
     process.exit(0);

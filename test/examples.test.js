@@ -34,6 +34,9 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      yield db.dropDatabase();
+
       // Insert data into dookie
       // Or, at the command line:
       // `dookie push --db test --file ./example/basic/file.yml`
@@ -41,7 +44,6 @@ describe('Examples', function() {
 
       // ------------------------
       // Now that you've pushed, you should see the data in MongoDB
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
       const collections = (yield db.listCollections().toArray()).
         map(v => v.name).filter(v => !v.startsWith('system.')).sort();
       assert.equal(collections.length, 2);
@@ -94,6 +96,9 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      yield db.dropDatabase();
+
       // Insert data into dookie
       // Or, at the command line:
       // `dookie push --db test --file ./example/basic/parent.yml`
@@ -101,8 +106,6 @@ describe('Examples', function() {
 
       // ------------------------
       // Now that you've pushed, you should see the data in MongoDB
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
-
       const people = yield db.collection('people').find().toArray();
       assert.deepEqual(people, [{ _id: 'Axl Rose' }]);
 
@@ -139,6 +142,9 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      yield db.dropDatabase();
+
       // Insert data into dookie
       // Or, at the command line:
       // `dookie push --db test --file ./example/$extend.yml`
@@ -146,8 +152,6 @@ describe('Examples', function() {
 
       // ------------------------
       // Now that you've pushed, you should see the data in MongoDB
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
-
       const people = yield db.collection('people').find().toArray();
       assert.deepEqual(people, [
         { band: `Guns N' Roses`, _id: 'Axl Rose' },
@@ -180,6 +184,9 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      yield db.dropDatabase();
+
       // Insert data into dookie
       // Or, at the command line:
       // `dookie push --db test --file ./example/$eval.yml`
@@ -187,8 +194,6 @@ describe('Examples', function() {
 
       // ------------------------
       // Now that you've pushed, you should see the data in MongoDB
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
-
       const people = yield db.collection('people').find().toArray();
       assert.deepEqual(people, [
         { _id: 0, firstName: 'Axl', lastName: 'Rose', name: 'Axl Rose' }
@@ -214,8 +219,23 @@ describe('Examples', function() {
 
   it('can pull() data out of MongoDB', function(done) {
     co(function*() {
+      // acquit:ignore:start
+      const fs = require('fs');
+      const yaml = require('js-yaml');
+      // acquit:ignore:end
+      const filename = './example/$eval.yml';
+      const contents = fs.readFileSync(filename);
+      const parsed = yaml.safeLoad(contents);
+
+
       const mongodbUri = 'mongodb://localhost:27017/test';
+      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      yield db.dropDatabase();
+
       // Insert data into dookie
+      yield dookie.push(mongodbUri, parsed, filename);
+
+      // Pull data with dookie
       // Or, at the command line:
       // `dookie pull --db test --file ./output.json`
       const json = yield dookie.pull(mongodbUri);

@@ -27,7 +27,7 @@ function push(uri, data, options) {
     const db = yield mongodb.MongoClient.connect(uri);
     options = standardizePushOptions(options);
 
-    if (options.dropDatabase !== false) {
+    if (options.dropDatabase === true) {
       yield db.dropDatabase();
     }
 
@@ -178,8 +178,8 @@ function pullToStream(uri, stream) {
   });
 }
 
-exports.push = function(uri, data, path) {
-  return push(uri, data, path);
+exports.push = function(uri, data, pathOrOptions) {
+  return push(uri, data, pathOrOptions);
 };
 
 exports.pull = function(uri) {
