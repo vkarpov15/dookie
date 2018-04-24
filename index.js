@@ -89,6 +89,7 @@ function push(uri, data, options) {
       promises.push(db.collection(collection).insert(docs));
     }
 
+    yield db.close();
     const res = yield promises;
     return res;
   });
@@ -142,6 +143,7 @@ function pull(uri) {
       res[collection] = contents[i].map(doc => ejson.serialize(doc));
     });
 
+    yield db.close();
     return res;
   });
 }
@@ -175,6 +177,7 @@ function pullToStream(uri, stream) {
       stream.write(`\n]`);
     }
     stream.write(`\n}`);
+    yield db.close();
   });
 }
 
