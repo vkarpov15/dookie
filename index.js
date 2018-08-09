@@ -88,7 +88,9 @@ function push(uri, data, options) {
       }
       promises.push(db.collection(collection).insert(docs));
     }
-
+	if (options.clearConnection === true) {
+      yield db.close();
+    }
     const res = yield promises;
     return res;
   });
@@ -118,7 +120,7 @@ function expand(extensions, doc) {
   });
 }
 
-function pull(uri) {
+function pull(uri, options) {
   return co(function*() {
     const db = yield mongodb.MongoClient.connect(uri);
 
@@ -141,6 +143,10 @@ function pull(uri) {
     filteredCollections.forEach(function(collection, i) {
       res[collection] = contents[i].map(doc => ejson.serialize(doc));
     });
+
+    if (options.clearConnection === true) {
+      yield db.close();
+    }
 
     return res;
   });
@@ -182,8 +188,8 @@ exports.push = function(uri, data, pathOrOptions) {
   return push(uri, data, pathOrOptions);
 };
 
-exports.pull = function(uri) {
-  return pull(uri);
+exports.pull = function(uri, options) {
+  return pull(uri, options);
 };
 
 exports.pullToStream = pullToStream;
