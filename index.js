@@ -5,6 +5,7 @@ const co = require('co');
 const dot = require('dot-component');
 const ejson = require('mongodb-extended-json');
 const fs = require('fs');
+const get = require('lodash.get');
 const mongodb = require('mongodb');
 const ns = require('mongodb-ns');
 const path = require('path');
@@ -88,7 +89,7 @@ function push(uri, data, options) {
       }
       promises.push(db.collection(collection).insert(docs));
     }
-	if (options.clearConnection === true) {
+    if (get(options, 'clearConnection', null)) {
       yield db.close();
     }
     const res = yield promises;
@@ -144,7 +145,7 @@ function pull(uri, options) {
       res[collection] = contents[i].map(doc => ejson.serialize(doc));
     });
 
-    if (options.clearConnection === true) {
+    if (get(options, 'clearConnection', null)) {
       yield db.close();
     }
 

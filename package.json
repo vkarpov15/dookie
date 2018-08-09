@@ -22,6 +22,7 @@
     "dot-component": "0.1.1",
     "graceful-fs": "4.1.11",
     "js-yaml": "3.2.1",
+    "lodash.get": "4.4.2",
     "minimatch": "3.0.4",
     "mongodb": "~2.2.0",
     "mongodb-extended-json": "1.7.0",
