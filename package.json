@@ -30,11 +30,11 @@
     "thunkify": "2.1.2"
   },
   "devDependencies": {
-    "acquit": "0.4.0",
-    "acquit-ignore": "0.0.3",
-    "acquit-markdown": "0.0.2",
+    "acquit": "1.0.3",
+    "acquit-ignore": "0.1.0",
+    "acquit-markdown": "0.1.0",
     "lodash": "4.x",
-    "mocha": "2.2.4"
+    "mocha": "5.x"
   },
   "engines": {
     "node": ">= 4.0.0"
