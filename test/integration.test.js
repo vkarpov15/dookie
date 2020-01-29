@@ -15,7 +15,8 @@ describe('dookie:push', function() {
       const uri = 'mongodb://localhost:27017/test';
       yield dookie.push(uri, { 'sample': [{ x: 1 }] }, { dropDatabase: true });
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       const docs = yield db.collection('sample').find({}).toArray();
       assert.equal(docs.length, 1);
       assert.equal(docs[0].x, 1);
@@ -37,7 +38,8 @@ describe('dookie:push', function() {
 
       yield dookie.push(uri, toInsert, { dropDatabase: true });
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       const docs = yield db.collection('sample').find({}).toArray();
       assert.equal(docs.length, 1);
       assert.equal(docs[0].x, 1);
@@ -62,7 +64,8 @@ describe('dookie:push', function() {
 
       yield dookie.push(uri, toInsert, { dropDatabase: true });
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       const docs = yield db.collection('sample').find({}).toArray();
 
       assert.equal(docs.length, 1);
@@ -81,7 +84,8 @@ describe('dookie:push', function() {
 
       yield dookie.push(uri, toInsert, path, { dropDatabase: true });
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       const people = yield db.collection('people').find({}).toArray();
       assert.equal(people.length, 1);
       assert.equal(people[0]._id, 'Axl Rose');
@@ -106,7 +110,8 @@ describe('dookie:push', function() {
 
       yield dookie.push(uri, toInsert, { dropDatabase: true });
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       const docs = yield db.collection('sample').find({}).toArray();
 
       assert.equal(docs.length, 1);
@@ -129,7 +134,8 @@ describe('dookie:push', function() {
       yield dookie.push(uri, _.cloneDeep(toInsert), { dropDatabase: true });
       yield dookie.push(uri, _.cloneDeep(toInsert));
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       const docs = yield db.collection('sample').find({}).toArray();
       assert.equal(docs.length, 2);
       done();
@@ -142,7 +148,8 @@ describe('dookie:pull', function() {
     co(function*() {
       const uri = 'mongodb://localhost:27017/test2';
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       yield db.dropDatabase();
       yield db.collection('sample').insert({ x: 1 });
 
@@ -163,7 +170,8 @@ describe('dookie:pullToStream', function() {
     co(function*() {
       const uri = 'mongodb://localhost:27017/test3';
 
-      const db = yield mongodb.MongoClient.connect(uri);
+      const client = yield mongodb.MongoClient.connect(uri);
+      const db = client.db();
       yield db.dropDatabase();
       yield db.collection('sample').insert({ x: 1 });
 

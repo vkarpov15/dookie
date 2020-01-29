@@ -25,7 +25,8 @@ function standardizePushOptions(options) {
 
 function push(uri, data, options) {
   return co(function*() {
-    const db = yield mongodb.MongoClient.connect(uri);
+    const client = yield mongodb.MongoClient.connect(uri);
+    const db = client.db();
     options = standardizePushOptions(options);
 
     if (options.dropDatabase === true) {
@@ -123,7 +124,8 @@ function expand(extensions, doc) {
 
 function pull(uri, options) {
   return co(function*() {
-    const db = yield mongodb.MongoClient.connect(uri);
+    const client = yield mongodb.MongoClient.connect(uri);
+    const db = client.db();
 
     const collections = yield db.listCollections().toArray();
 
@@ -155,7 +157,8 @@ function pull(uri, options) {
 
 function pullToStream(uri, stream) {
   return co(function*() {
-    const db = yield mongodb.MongoClient.connect(uri);
+    const client = yield mongodb.MongoClient.connect(uri);
+    const db = client.db();
     const collections = db.listCollections();
     stream.write(`{\n`);
     let first = true;

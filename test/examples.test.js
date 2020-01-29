@@ -34,7 +34,8 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      const client = yield mongodb.MongoClient.connect(mongodbUri);
+      const db = client.db();
       yield db.dropDatabase();
 
       // Insert data into dookie
@@ -96,7 +97,8 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      const client = yield mongodb.MongoClient.connect(mongodbUri);
+      const db = client.db();
       yield db.dropDatabase();
 
       // Insert data into dookie
@@ -142,7 +144,8 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      const client = yield mongodb.MongoClient.connect(mongodbUri);
+      const db = client.db();
       yield db.dropDatabase();
 
       // Insert data into dookie
@@ -184,7 +187,8 @@ describe('Examples', function() {
       const parsed = yaml.safeLoad(contents);
 
       const mongodbUri = 'mongodb://localhost:27017/test';
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      const client = yield mongodb.MongoClient.connect(mongodbUri);
+      const db = client.db();
       yield db.dropDatabase();
 
       // Insert data into dookie
@@ -227,9 +231,9 @@ describe('Examples', function() {
       const contents = fs.readFileSync(filename);
       const parsed = yaml.safeLoad(contents);
 
-
       const mongodbUri = 'mongodb://localhost:27017/test';
-      const db = yield mongodb.MongoClient.connect(mongodbUri);
+      const client = yield mongodb.MongoClient.connect(mongodbUri);
+      const db = client.db();
       yield db.dropDatabase();
 
       // Insert data into dookie
