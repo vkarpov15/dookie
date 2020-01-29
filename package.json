@@ -21,7 +21,7 @@
     "commander": "2.8.1",
     "dot-component": "0.1.1",
     "graceful-fs": "4.1.11",
-    "js-yaml": "3.2.1",
+    "js-yaml": "3.13.1",
     "lodash.get": "4.4.2",
     "minimatch": "3.0.4",
     "mongodb": "~3.5",
