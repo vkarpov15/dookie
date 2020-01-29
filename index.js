@@ -155,39 +155,6 @@ function pull(uri, options) {
   });
 }
 
-function pullToStream(uri, stream) {
-  return co(function*() {
-    const client = yield mongodb.MongoClient.connect(uri);
-    const db = client.db();
-    const collections = db.listCollections();
-    stream.write(`{\n`);
-    let first = true;
-    for (let collection = yield collections.next();
-        collection != null;
-        collection = yield collections.next()) {
-      let namespace = ns(`test.${collection.name}`);
-      if (namespace.system || namespace.oplog || namespace.special) {
-        continue;
-      }
-      if (!first) {
-        stream.write(',\n');
-        first = false;
-      }
-      stream.write(`"${collection.name}": [\n`);
-
-      const cursor = db.collection(collection.name).find();
-      for (let doc = yield cursor.next();
-          doc != null;
-          doc = yield cursor.next()) {
-        stream.write(JSON.stringify(ejson.serialize(doc), null, '  '));
-      }
-
-      stream.write(`\n]`);
-    }
-    stream.write(`\n}`);
-  });
-}
-
 exports.push = function(uri, data, pathOrOptions) {
   return push(uri, data, pathOrOptions);
 };
@@ -196,4 +163,5 @@ exports.pull = function(uri, options) {
   return pull(uri, options);
 };
 
-exports.pullToStream = pullToStream;
+exports.pullToFile = require('./src/pullToFile');
+exports.pushFromFile = require('./src/pushFromFile');

@@ -37,7 +37,7 @@
     "mocha": "5.x"
   },
   "engines": {
-    "node": ">= 4.0.0"
+    "node": ">= 10.0.0"
   },
   "bin": "./bin/dookie.js",
   "repository": {
