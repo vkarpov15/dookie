@@ -165,3 +165,4 @@ exports.pull = function(uri, options) {
 
 exports.pullToFile = require('./src/pullToFile');
 exports.pushFromFile = require('./src/pushFromFile');
+exports.pushFromRemote = require('./src/pushFromRemote');

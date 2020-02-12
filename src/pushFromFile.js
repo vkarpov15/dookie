@@ -1,7 +1,8 @@
 'use strict';
 
 const ejson = require('mongodb-extended-json');
-const fs = require('fs').promises; // Requires Node.js 10
+const fs = require('fs');
+const jsonstream = require('json-stream');
 const mongodb = require('mongodb');
 
 module.exports = async function pushFromFile(uri, filename) {
@@ -10,33 +11,21 @@ module.exports = async function pushFromFile(uri, filename) {
 
   await db.dropDatabase();
 
-  const handle = await fs.open(filename, 'r');
+  const stream = fs.createReadStream(filename).pipe(jsonstream());
   let collection;
-  let cur = '';
 
-  while (true) {
-    const buf = Buffer.alloc(1000);
-    await handle.read(buf, 0, 1000);
-
-    const read = buf.toString('utf8');
-    cur += read;
-    if (!read.indexOf('\n')) {
-      continue;
-    }
-
-    const sp = cur.split('\n');
-    for (let line of sp.slice(0, sp.length - 1)) {
-      const data = JSON.parse(line);
-      if (data.$collection != null) {
-        collection = data.$collection;
-      } else {
-        if (collection == null) {
-          throw new Error('No collection!');
-        }
-        await db.collection(collection).insertOne(ejson.deserialize(data));
+  return new Promise((resolve, reject) => {
+    stream.on('data', obj => {
+      if (obj.$collection) {
+        collection = obj.$collection;
+        return;
       }
-    }
 
-    cur = sp[sp.length - 1];
-  }
+      db.collection(collection).insertOne(ejson.deserialize(obj)).
+        catch(err => reject(err));
+    });
+
+    stream.on('end', () => resolve());
+    stream.on('error', err => reject(err));
+  });
 };
