@@ -23,10 +23,19 @@ module.exports = async function pushFromFile(localUri, remoteUri, collections) {
     }
 
     const cursor = remote.collection(name).find(collections[name]);
+    let docs = [];
+    const perBatch = 5;
     for (let doc = await cursor.next();
         doc != null;
         doc = await cursor.next()) {
-      local.collection(name).insertOne(doc);
+      docs.push(doc);
+      if (docs.length >= perBatch) {
+        await local.collection(name).insertMany(docs);
+        docs = [];
+      }
+    }
+    if (docs.length > 0) {
+      await local.collection(name).insertMany(docs);
     }
   }
 };
