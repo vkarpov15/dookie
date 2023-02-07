@@ -10,7 +10,7 @@ module.exports = async function pushFromFile(localUri, remoteUri, collections) {
   await local.dropDatabase();
 
   if (collections == null) {
-    const collectionNames = await db.listCollections();
+    const collectionNames = await remote.listCollections().toArray();
     // Convert `['foo', 'bar']` into `{ foo: {}, bar: {} }`
     collections = collectionNames.
       reduce((res, coll) => Object.assign(res, { [coll.name]: {} }), {});
