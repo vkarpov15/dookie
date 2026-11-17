@@ -1,34 +1,39 @@
 'use strict';
 
-const mongodb = require('mongodb');
-const ejson = require('mongodb-extended-json');
+const { EJSON } = require('mongodb').BSON;
 const fs = require('fs');
+const mongodb = require('mongodb');
 const ns = require('mongodb-ns');
+const { pipeline } = require('stream/promises');
 
 module.exports = async function pullToFile(uri, collections, path) {
   const client = await mongodb.MongoClient.connect(uri);
-  const db = client.db();
-  const stream = fs.createWriteStream(path);
+  try {
+    const db = client.db();
 
-  if (collections == null) {
-    const collectionNames = await db.listCollections();
-    // Convert `['foo', 'bar']` into `{ foo: {}, bar: {} }`
-    collections = collectionNames.
-      reduce((res, coll) => Object.assign(res, { [coll.name]: {} }), {});
-  }
-
-  for (const name of Object.keys(collections)) {
-    let namespace = ns(`test.${name}`);
-    if (namespace.system || namespace.oplog || namespace.special) {
-      continue;
+    if (collections == null) {
+      const collectionNames = await db.listCollections().toArray();
+      // Convert `['foo', 'bar']` into `{ foo: {}, bar: {} }`
+      collections = collectionNames.
+        reduce((res, coll) => Object.assign(res, { [coll.name]: {} }), {});
     }
-    stream.write(`{ "$collection": "${name}" }\n`);
 
-    const cursor = db.collection(name).find(collections[name]);
-    for (let doc = await cursor.next();
-        doc != null;
-        doc = await cursor.next()) {
-      stream.write('  ' + JSON.stringify(ejson.serialize(doc)) + '\n');
-    }
+    // `pipeline()` handles backpressure and resolves once the file is
+    // flushed and closed
+    await pipeline(async function*() {
+      for (const name of Object.keys(collections)) {
+        let namespace = ns(`test.${name}`);
+        if (namespace.system || namespace.oplog || namespace.special) {
+          continue;
+        }
+        yield JSON.stringify({ $collection: name }) + '\n';
+
+        for await (const doc of db.collection(name).find(collections[name])) {
+          yield EJSON.stringify(doc) + '\n';
+        }
+      }
+    }, fs.createWriteStream(path));
+  } finally {
+    await client.close();
   }
-}
+};

@@ -2,7 +2,6 @@
 'use strict';
 
 const JSONStream = require('JSONStream');
-const co = require('co');
 const commander = require('commander');
 const dookie = require('../');
 const fs = require('fs');
@@ -37,8 +36,8 @@ if (!commander.db && !commander.uri) {
 if (cmd === 'pull') {
   const uri = commander.uri || `mongodb://localhost:27017/${commander.db}`;
   console.log(`Writing data from ${uri} to ${commander.file}`);
-  co(function*() {
-    const res = yield dookie.pull(uri);
+  (async function() {
+    const res = await dookie.pull(uri);
     const stringify = JSONStream.stringifyObject();
     stringify.pipe(fs.createWriteStream(commander.file)).
       on('finish', () => {
@@ -52,7 +51,7 @@ if (cmd === 'pull') {
       stringify.write([coll, res[coll]]);
     }
     stringify.end();
-  }).
+  })().
   catch(function(error) {
     console.log('Error reading data:', error.stack);
     process.exit(1);
@@ -60,7 +59,7 @@ if (cmd === 'pull') {
 } else if (cmd === 'push') {
   console.log(`Writing data from ${commander.file} to ${commander.db}`);
 
-  co(function*() {
+  (async function() {
     const uri = commander.uri || `mongodb://localhost:27017/${commander.db}`;
     let data;
     if (path.extname(commander.file) === '.json') {
@@ -69,12 +68,12 @@ if (cmd === 'pull') {
       data = yaml.safeLoad(fs.readFileSync(commander.file));
     }
 
-    yield dookie.push(uri, data,
+    await dookie.push(uri, data,
       { filename: commander.file, dropDatabase: commander.dropDatabase });
 
     console.log('Success!');
     process.exit(0);
-  }).catch(function(error) {
+  })().catch(function(error) {
     console.log('Error writing data', error.stack);
     process.exit(1);
   });

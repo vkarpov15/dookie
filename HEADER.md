@@ -6,5 +6,6 @@ Dookie lets you write MongoDB test fixtures in JSON or
 [YAML](https://en.wikipedia.org/wiki/YAML) with extra syntactic sugar
 (extended JSON, variables, imports, inheritance, etc.).
 
-**Note:** Dookie requires Node >= 4.0.0. Dookie is **not** tested with nor
-expected to work with Node 0.x or io.js.
+**Note:** Dookie requires Node >= 20.19.0.
+
+[![Circle CI](https://circleci.com/gh/vkarpov15/dookie.svg?style=svg)](https://circleci.com/gh/vkarpov15/dookie)

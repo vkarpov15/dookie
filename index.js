@@ -1,15 +1,11 @@
 'use strict';
 
-const clone = require('clone');
-const co = require('co');
+const { EJSON } = require('mongodb').BSON;
 const dot = require('dot-component');
-const ejson = require('mongodb-extended-json');
 const fs = require('fs');
-const get = require('lodash.get');
 const mongodb = require('mongodb');
 const ns = require('mongodb-ns');
 const path = require('path');
-const thunkify = require('thunkify');
 const vm = require('vm');
 const yaml = require('js-yaml');
 
@@ -20,17 +16,17 @@ function standardizePushOptions(options) {
   if (typeof options === 'string') {
     return { filename: options };
   }
-  return clone(options);
+  return structuredClone(options);
 }
 
-function push(uri, data, options) {
-  return co(function*() {
-    const client = yield mongodb.MongoClient.connect(uri);
+async function push(uri, data, options) {
+  const client = await mongodb.MongoClient.connect(uri);
+  try {
     const db = client.db();
     options = standardizePushOptions(options);
 
     if (options.dropDatabase === true) {
-      yield db.dropDatabase();
+      await db.dropDatabase();
     }
 
     // $require
@@ -44,7 +40,7 @@ function push(uri, data, options) {
         const directory = path.dirname(filename);
         const extension = path.extname(filename);
         const fileToRead = path.join(directory, data[key]);
-        const fileContents = yield thunkify(fs.readFile)(fileToRead);
+        const fileContents = await fs.promises.readFile(fileToRead);
         const parsedContents = {
           '.yml': () => yaml.safeLoad(fileContents),
           '.json': () => JSON.parse(fileContents)
@@ -86,16 +82,16 @@ function push(uri, data, options) {
           dot.set(doc, key, tmp[key]);
         }
 
-        docs[i] = ejson.deserialize(doc);
+        // Serialize first so values that are already BSON types, like dates
+        // from YAML or `$eval`, survive `deserialize()`'s `JSON.stringify()`
+        docs[i] = EJSON.deserialize(EJSON.serialize(doc));
       }
-      promises.push(db.collection(collection).insert(docs));
+      promises.push(db.collection(collection).insertMany(docs));
     }
-    if (get(options, 'clearConnection', null)) {
-      yield db.close();
-    }
-    const res = yield promises;
-    return res;
-  });
+    return await Promise.all(promises);
+  } finally {
+    await client.close();
+  }
 }
 
 function expand(extensions, doc) {
@@ -104,7 +100,7 @@ function expand(extensions, doc) {
     delete doc.$extend;
     for (const key in extensions[tmp]) {
       if (typeof doc[key] === 'undefined') {
-        doc[key] = clone(extensions[tmp][key]);
+        doc[key] = structuredClone(extensions[tmp][key]);
       }
     }
   }
@@ -112,7 +108,7 @@ function expand(extensions, doc) {
   Object.keys(doc).forEach(function(key) {
     if (doc[key] && typeof doc[key] === 'object') {
       if (doc[key].$eval) {
-        const _doc = clone(doc);
+        const _doc = structuredClone(doc);
         _doc.require = v => require(v);
         const context = vm.createContext(_doc);
         doc[key] = vm.runInContext(doc[key].$eval, context);
@@ -122,12 +118,12 @@ function expand(extensions, doc) {
   });
 }
 
-function pull(uri, options) {
-  return co(function*() {
-    const client = yield mongodb.MongoClient.connect(uri);
+async function pull(uri) {
+  const client = await mongodb.MongoClient.connect(uri);
+  try {
     const db = client.db();
 
-    const collections = yield db.listCollections().toArray();
+    const collections = await db.listCollections().toArray();
 
     let promises = [];
     let filteredCollections = [];
@@ -140,27 +136,25 @@ function pull(uri, options) {
       promises.push(db.collection(collections[i].name).find({}).toArray());
     }
 
-    const contents = yield promises;
+    const contents = await Promise.all(promises);
     let res = {};
 
     filteredCollections.forEach(function(collection, i) {
-      res[collection] = contents[i].map(doc => ejson.serialize(doc));
+      res[collection] = contents[i].map(doc => EJSON.serialize(doc));
     });
 
-    if (get(options, 'clearConnection', null)) {
-      yield db.close();
-    }
-
     return res;
-  });
+  } finally {
+    await client.close();
+  }
 }
 
 exports.push = function(uri, data, pathOrOptions) {
   return push(uri, data, pathOrOptions);
 };
 
-exports.pull = function(uri, options) {
-  return pull(uri, options);
+exports.pull = function(uri) {
+  return pull(uri);
 };
 
 exports.pullToFile = require('./src/pullToFile');

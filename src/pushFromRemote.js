@@ -3,10 +3,17 @@
 const mongodb = require('mongodb');
 const ns = require('mongodb-ns');
 
-module.exports = async function pushFromFile(localUri, remoteUri, collections) {
-  const local = await mongodb.MongoClient.connect(localUri).then(client => client.db());
-  const remote = await mongodb.MongoClient.connect(remoteUri).then(client => client.db());
+module.exports = async function pushFromRemote(localUri, remoteUri, collections) {
+  const localClient = await mongodb.MongoClient.connect(localUri);
+  const remoteClient = await mongodb.MongoClient.connect(remoteUri);
+  try {
+    await copy(localClient.db(), remoteClient.db(), collections);
+  } finally {
+    await Promise.all([localClient.close(), remoteClient.close()]);
+  }
+};
 
+async function copy(local, remote, collections) {
   await local.dropDatabase();
 
   if (collections == null) {
@@ -38,4 +45,4 @@ module.exports = async function pushFromFile(localUri, remoteUri, collections) {
       await local.collection(name).insertMany(docs);
     }
   }
-};
+}

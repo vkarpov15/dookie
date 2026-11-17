@@ -1,31 +1,49 @@
 'use strict';
 
-const ejson = require('mongodb-extended-json');
+const { EJSON } = require('mongodb').BSON;
 const fs = require('fs');
-const jsonstream = require('json-stream');
 const mongodb = require('mongodb');
+const readline = require('readline');
+
+const batchSize = 1000;
 
 module.exports = async function pushFromFile(uri, filename) {
   const client = await mongodb.MongoClient.connect(uri);
-  const db = client.db();
+  try {
+    const db = client.db();
 
-  await db.dropDatabase();
+    await db.dropDatabase();
 
-  const stream = fs.createReadStream(filename).pipe(jsonstream());
-  let collection;
-
-  return new Promise((resolve, reject) => {
-    stream.on('data', obj => {
+    const lines = readline.createInterface({
+      input: fs.createReadStream(filename),
+      crlfDelay: Infinity
+    });
+    let collection;
+    let docs = [];
+    for await (const line of lines) {
+      if (line.trim() === '') {
+        continue;
+      }
+      const obj = EJSON.parse(line);
       if (obj.$collection) {
+        if (docs.length > 0) {
+          await db.collection(collection).insertMany(docs);
+          docs = [];
+        }
         collection = obj.$collection;
-        return;
+        continue;
       }
 
-      db.collection(collection).insertOne(ejson.deserialize(obj)).
-        catch(err => reject(err));
-    });
-
-    stream.on('end', () => resolve());
-    stream.on('error', err => reject(err));
-  });
+      docs.push(obj);
+      if (docs.length >= batchSize) {
+        await db.collection(collection).insertMany(docs);
+        docs = [];
+      }
+    }
+    if (docs.length > 0) {
+      await db.collection(collection).insertMany(docs);
+    }
+  } finally {
+    await client.close();
+  }
 };
